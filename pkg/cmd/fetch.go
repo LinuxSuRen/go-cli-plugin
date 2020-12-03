@@ -56,7 +56,7 @@ func (c *jcliPluginFetchCmd) Run(cmd *cobra.Command, args []string) (err error) 
 		return
 	}
 
-	pluginRepo := fmt.Sprintf("%s/.jenkins-cli/plugins-repo", userHome)
+	pluginRepo := fmt.Sprintf("%s/.%s/plugins-repo", userHome, c.PluginRepo)
 	c.output = cmd.OutOrStdout()
 
 	var r *git.Repository

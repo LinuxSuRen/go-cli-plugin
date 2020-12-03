@@ -47,7 +47,7 @@ func (c *jcliPluginInstallCmd) Run(cmd *cobra.Command, args []string) (err error
 	}
 
 	var data []byte
-	pluginsMetadataFile := fmt.Sprintf("%s/.jenkins-cli/plugins-repo/%s.yaml", userHome, name)
+	pluginsMetadataFile := fmt.Sprintf("%s/.%s/plugins-repo/%s.yaml", c.PluginRepo, userHome, name)
 	if data, err = ioutil.ReadFile(pluginsMetadataFile); err == nil {
 		plugin := pkg.Plugin{}
 		if err = yaml.Unmarshal(data, &plugin); err == nil {
@@ -69,7 +69,7 @@ func (c *jcliPluginInstallCmd) download(plu pkg.Plugin) (err error) {
 	}
 
 	link := c.getDownloadLink(plu)
-	output := fmt.Sprintf("%s/.jenkins-cli/plugins/%s.tar.gz", userHome, plu.Main)
+	output := fmt.Sprintf("%s/.%s/plugins/%s.tar.gz", userHome, c.PluginOrg,plu.Main)
 
 	downloader := pkg.HTTPDownloader{
 		RoundTripper:   c.RoundTripper,
