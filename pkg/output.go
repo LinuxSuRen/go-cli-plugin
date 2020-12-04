@@ -3,8 +3,6 @@ package pkg
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/app/i18n"
-	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 	"io"
@@ -76,7 +74,7 @@ func (o *OutputOption) OutputV2(obj interface{}) (err error) {
 	case YAMLOutputFormat:
 		data, err = yaml.Marshal(obj)
 	case TableOutputFormat, "":
-		table := util.CreateTableWithHeader(o.Writer, o.WithoutHeaders)
+		table := CreateTableWithHeader(o.Writer, o.WithoutHeaders)
 		table.AddHeader(strings.Split(o.Columns, ",")...)
 		items := reflect.ValueOf(obj)
 		for i := 0; i < items.Len(); i++ {
@@ -122,7 +120,7 @@ func (o *OutputOption) Match(item reflect.Value) bool {
 		key := arr[0]
 		val := arr[1]
 
-		if !strings.Contains(util.ReflectFieldValueAsString(item, key), val) {
+		if !strings.Contains(ReflectFieldValueAsString(item, key), val) {
 			return false
 		}
 	}
@@ -139,7 +137,7 @@ func (o *OutputOption) GetLine(obj reflect.Value) []string {
 	}
 
 	for _, col := range columns {
-		cell := util.ReflectFieldValueAsString(obj, col)
+		cell := ReflectFieldValueAsString(obj, col)
 		if renderCell, ok := o.CellRenderMap[col]; ok && renderCell != nil {
 			cell = renderCell(cell)
 		}
@@ -153,16 +151,16 @@ func (o *OutputOption) GetLine(obj reflect.Value) []string {
 // Deprecated, see also SetFlagWithHeaders
 func (o *OutputOption) SetFlag(cmd *cobra.Command) {
 	cmd.Flags().StringVarP(&o.Format, "output", "o", TableOutputFormat,
-		i18n.T("Format the output, supported formats: table, json, yaml"))
+		"Format the output, supported formats: table, json, yaml")
 	cmd.Flags().BoolVarP(&o.WithoutHeaders, "no-headers", "", false,
-		i18n.T(`When using the default output format, don't print headers (default print headers)`))
+		`When using the default output format, don't print headers (default print headers)`)
 	cmd.Flags().StringArrayVarP(&o.Filter, "filter", "", []string{},
-		i18n.T("Filter for the list by fields"))
+		"Filter for the list by fields")
 }
 
 // SetFlagWithHeaders set the flags of output
 func (o *OutputOption) SetFlagWithHeaders(cmd *cobra.Command, headers string) {
 	o.SetFlag(cmd)
 	cmd.Flags().StringVarP(&o.Columns, "columns", "", headers,
-		i18n.T("The columns of table"))
+		"The columns of table")
 }
