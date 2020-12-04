@@ -1,14 +1,14 @@
 package config
 
 import (
-	"github.com/linuxsuren/go-cli-plugin/pkg"
+	cobra_ext "github.com/linuxsuren/cobra-extension"
 	"io"
 	"net/http"
 )
 
 type (
 	configPluginListCmd struct {
-		pkg.OutputOption
+		cobra_ext.OutputOption
 	}
 
 	jcliPluginFetchCmd struct {

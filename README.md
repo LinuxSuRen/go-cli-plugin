@@ -7,6 +7,10 @@
 
 This project aims to provide an easy way to let you writing a plugin for your CLI project.
 
+# Get started
+
+`go get github.com/linuxsuren/go-cli-plugin`
+
 # Original
 
 This project originally comes from [jcli](https://github.com/linuxsuren/go-cli-plugin).
