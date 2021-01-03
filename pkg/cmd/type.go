@@ -19,8 +19,9 @@ type (
 		Password   string
 		SSHKeyFile string
 
-		output    io.Writer
-		PluginOrg string
+		output         io.Writer
+		PluginOrg      string
+		PluginRepoName string
 	}
 
 	jcliPluginInstallCmd struct {

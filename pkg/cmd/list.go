@@ -7,7 +7,7 @@ import (
 
 // NewConfigPluginListCmd create a command for list all jcli plugins
 func NewConfigPluginListCmd() (cmd *cobra.Command) {
-	configPluginListCmd := configPluginListCmd{}
+	configPluginListCmd := &configPluginListCmd{}
 
 	cmd = &cobra.Command{
 		Use:               "list",
