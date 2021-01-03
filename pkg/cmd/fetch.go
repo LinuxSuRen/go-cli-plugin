@@ -16,9 +16,9 @@ import (
 
 // NewConfigPluginFetchCmd create a command for fetching plugin metadata
 func NewConfigPluginFetchCmd(pluginOrg, pluginRepo string) (cmd *cobra.Command) {
-	pluginFetchCmd := jcliPluginFetchCmd{
-		PluginOrg: pluginOrg,
-		PluginRepo: pluginRepo,
+	pluginFetchCmd := &jcliPluginFetchCmd{
+		PluginOrg:      pluginOrg,
+		PluginRepoName: pluginRepo,
 	}
 
 	cmd = &cobra.Command{
@@ -34,7 +34,7 @@ but you can change it by giving a command parameter.`, pluginFetchCmd.PluginOrg,
 	// add flags
 	flags := cmd.Flags()
 	flags.StringVarP(&pluginFetchCmd.PluginRepo, "plugin-repo", "",
-		fmt.Sprintf("https://github.com/%s/%s", pluginFetchCmd.PluginOrg, pluginFetchCmd.PluginRepo),
+		fmt.Sprintf("https://github.com/%s/%s", pluginFetchCmd.PluginOrg, pluginFetchCmd.PluginRepoName),
 		"The plugin git repository URL")
 	flags.BoolVarP(&pluginFetchCmd.Reset, "reset", "", true,
 		"If you want to reset the git local repo when pulling it")
@@ -56,11 +56,12 @@ func (c *jcliPluginFetchCmd) Run(cmd *cobra.Command, args []string) (err error) 
 		return
 	}
 
-	pluginRepo := fmt.Sprintf("%s/.%s/plugins-repo", userHome, c.PluginRepo)
+	pluginRepoCache := fmt.Sprintf("%s/.jenkins-cli/plugins-repo", userHome)
 	c.output = cmd.OutOrStdout()
 
+	cmd.Printf("start to fetch metadata from '%s', cache to '%s'\n", c.PluginRepo, pluginRepoCache)
 	var r *git.Repository
-	if r, err = git.PlainOpen(pluginRepo); err == nil {
+	if r, err = git.PlainOpen(pluginRepoCache); err == nil {
 		var w *git.Worktree
 		if w, err = r.Worktree(); err != nil {
 			return
@@ -80,7 +81,7 @@ func (c *jcliPluginFetchCmd) Run(cmd *cobra.Command, args []string) (err error) 
 		}
 	} else {
 		cloneOptions := c.getCloneOptions()
-		_, err = git.PlainClone(pluginRepo, false, cloneOptions)
+		_, err = git.PlainClone(pluginRepoCache, false, cloneOptions)
 	}
 	return
 }

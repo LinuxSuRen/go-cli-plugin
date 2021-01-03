@@ -47,7 +47,7 @@ func (c *jcliPluginInstallCmd) Run(cmd *cobra.Command, args []string) (err error
 	}
 
 	var data []byte
-	pluginsMetadataFile := fmt.Sprintf("%s/.%s/plugins-repo/%s.yaml", c.PluginRepo, userHome, name)
+	pluginsMetadataFile := fmt.Sprintf("%s/.%s/plugins-repo/%s.yaml", userHome, c.PluginRepo, name)
 	if data, err = ioutil.ReadFile(pluginsMetadataFile); err == nil {
 		plugin := pkg.Plugin{}
 		if err = yaml.Unmarshal(data, &plugin); err == nil {
