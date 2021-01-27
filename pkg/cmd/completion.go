@@ -7,9 +7,9 @@ import (
 )
 
 // ValidPluginNames returns the valid plugin name list
-func ValidPluginNames(cmd *cobra.Command, args []string, prefix string) (pluginNames []string, directive cobra.ShellCompDirective) {
+func ValidPluginNames(cmd *cobra.Command, args []string, prefix, pluginOrg, pluginRepo string) (pluginNames []string, directive cobra.ShellCompDirective) {
 	directive = cobra.ShellCompDirectiveNoFileComp
-	if plugins, err := pkg.FindPlugins(); err == nil {
+	if plugins, err := pkg.FindPlugins(pluginOrg, pluginRepo); err == nil {
 		pluginNames = make([]string, 0)
 		for i := range plugins {
 			plugin := plugins[i]

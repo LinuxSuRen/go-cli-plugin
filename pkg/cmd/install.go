@@ -24,12 +24,14 @@ func NewConfigPluginInstallCmd(pluginOrg, pluginRepo string) (cmd *cobra.Command
 	}
 
 	cmd = &cobra.Command{
-		Use:               "install",
-		Short:             "install a jcli plugin",
-		Long:              "install a jcli plugin",
-		Args:              cobra.MinimumNArgs(1),
-		ValidArgsFunction: ValidPluginNames,
-		RunE:              pluginInstallCmd.Run,
+		Use:   "install",
+		Short: "install a jcli plugin",
+		Long:  "install a jcli plugin",
+		Args:  cobra.MinimumNArgs(1),
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) (strings []string, directive cobra.ShellCompDirective) {
+			return ValidPluginNames(cmd, args, toComplete, pluginOrg, pluginRepo)
+		},
+		RunE: pluginInstallCmd.Run,
 	}
 
 	// add flags

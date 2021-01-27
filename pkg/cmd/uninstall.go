@@ -23,7 +23,9 @@ func NewConfigPluginUninstallCmd(pluginOrg, pluginRepo string) (cmd *cobra.Comma
 		Long:              "Remove a plugin",
 		Args:              cobra.MinimumNArgs(1),
 		RunE:              jcliPluginUninstallCmd.RunE,
-		ValidArgsFunction: ValidPluginNames,
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) (strings []string, directive cobra.ShellCompDirective) {
+			return ValidPluginNames(cmd, args, toComplete, pluginOrg, pluginRepo)
+		},
 	}
 	return
 }
