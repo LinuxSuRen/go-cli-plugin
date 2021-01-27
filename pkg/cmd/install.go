@@ -76,6 +76,7 @@ func (c *jcliPluginInstallCmd) download(plu pkg.Plugin) (err error) {
 	link := c.getDownloadLink(plu)
 	output := fmt.Sprintf("%s/.%s/plugins-repo/%s.tar.gz", userHome, c.PluginOrg, plu.Main)
 
+	fmt.Printf("start to download from '%s' to '%s'\n", link, output)
 	if c.Thread > 1 {
 		err = hd.DownloadFileWithMultipleThread(link, output, c.Thread, c.ShowProgress)
 	} else {
