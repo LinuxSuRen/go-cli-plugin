@@ -30,6 +30,7 @@ type (
 	jcliPluginInstallCmd struct {
 		RoundTripper http.RoundTripper
 		ShowProgress bool
+		Thread       int
 
 		output         io.Writer
 		PluginOrg      string

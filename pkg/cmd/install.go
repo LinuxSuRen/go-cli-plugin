@@ -5,6 +5,7 @@ import (
 	"compress/gzip"
 	"fmt"
 	"github.com/linuxsuren/go-cli-plugin/pkg"
+	hd "github.com/linuxsuren/http-downloader/pkg"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
@@ -38,6 +39,7 @@ func NewConfigPluginInstallCmd(pluginOrg, pluginRepo string) (cmd *cobra.Command
 	flags := cmd.Flags()
 	flags.BoolVarP(&pluginInstallCmd.ShowProgress, "show-progress", "", true,
 		"If you want to show the progress of download")
+	flags.IntVarP(&pluginInstallCmd.Thread, "thread", "t", 4, "Using multi-thread to download plugin")
 	return
 }
 
@@ -74,13 +76,19 @@ func (c *jcliPluginInstallCmd) download(plu pkg.Plugin) (err error) {
 	link := c.getDownloadLink(plu)
 	output := fmt.Sprintf("%s/.%s/plugins/%s.tar.gz", userHome, c.PluginOrg, plu.Main)
 
-	downloader := pkg.HTTPDownloader{
-		RoundTripper:   c.RoundTripper,
-		TargetFilePath: output,
-		URL:            link,
-		ShowProgress:   c.ShowProgress,
+	if c.Thread > 1 {
+		err = hd.DownloadFileWithMultipleThread(link, output, c.Thread, c.ShowProgress)
+	} else {
+		downloader := hd.HTTPDownloader{
+			RoundTripper:   c.RoundTripper,
+			TargetFilePath: output,
+			URL:            link,
+			ShowProgress:   c.ShowProgress,
+		}
+		err = downloader.DownloadFile()
 	}
-	if err = downloader.DownloadFile(); err == nil {
+
+	if err == nil {
 		err = c.extractFiles(plu, output)
 	}
 	return
