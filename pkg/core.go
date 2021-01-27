@@ -29,14 +29,14 @@ type PluginError struct {
 	code int
 }
 
-func FindPlugins() (plugins []Plugin, err error) {
+func FindPlugins(pluginOrg, pluginRepo string) (plugins []Plugin, err error) {
 	var userHome string
 	if userHome, err = homedir.Dir(); err != nil {
 		return
 	}
 
 	plugins = make([]Plugin, 0)
-	pluginsDir := fmt.Sprintf("%s/.jenkins-cli/plugins-repo/*.yaml", userHome)
+	pluginsDir := fmt.Sprintf("%s/.%s/plugins-repo/*.yaml", userHome, pluginRepo)
 	//fmt.Println("start to parse plugin file from dir", pluginsDir)
 	var files []string
 	if files, err = filepath.Glob(pluginsDir); err == nil {
@@ -51,7 +51,7 @@ func FindPlugins() (plugins []Plugin, err error) {
 						plugin.Main = fmt.Sprintf("jcli-%s-Plugin", plugin.Use)
 					}
 
-					if _, fileErr := os.Stat(GetJCLIPluginPath(userHome, plugin.Main, true)); !os.IsNotExist(fileErr) {
+					if _, fileErr := os.Stat(GetJCLIPluginPath(userHome, pluginRepo, plugin.Main, true)); !os.IsNotExist(fileErr) {
 						plugin.Installed = true
 					}
 					plugins = append(plugins, plugin)
@@ -65,10 +65,10 @@ func FindPlugins() (plugins []Plugin, err error) {
 }
 
 // LoadPlugins loads the plugins
-func LoadPlugins(cmd *cobra.Command) {
+func LoadPlugins(cmd *cobra.Command, pluginOrg, pluginRepo string) {
 	var plugins []Plugin
 	var err error
-	if plugins, err = FindPlugins(); err != nil {
+	if plugins, err = FindPlugins(pluginOrg, pluginRepo); err != nil {
 		cmd.PrintErrln("Cannot load plugins successfully")
 		return
 	}
@@ -118,7 +118,7 @@ func LoadPlugins(cmd *cobra.Command) {
 					return
 				}
 
-				pluginExec := GetJCLIPluginPath(userHome, cmd.Annotations["main"], true)
+				pluginExec := GetJCLIPluginPath(userHome, pluginRepo, cmd.Annotations["main"], true)
 				err = callPluginExecutable(cmd, pluginExec, args, cmd.OutOrStdout())
 				return
 			},
@@ -127,11 +127,11 @@ func LoadPlugins(cmd *cobra.Command) {
 	}
 }
 
-//GetJCLIPluginPath returns the path of a jcli plugin
-func GetJCLIPluginPath(userHome, name string, binary bool) string {
+// GetJCLIPluginPath returns the path of a jcli plugin
+func GetJCLIPluginPath(userHome, pluginRepoName, name string, binary bool) string {
 	suffix := ".yaml"
 	if binary {
 		suffix = ""
 	}
-	return fmt.Sprintf("%s/.jenkins-cli/plugins/%s%s", userHome, name, suffix)
+	return fmt.Sprintf("%s/.%s/plugins-repo/%s%s", userHome, pluginRepoName, name, suffix)
 }

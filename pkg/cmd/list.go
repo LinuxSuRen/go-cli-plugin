@@ -6,8 +6,12 @@ import (
 )
 
 // NewConfigPluginListCmd create a command for list all jcli plugins
-func NewConfigPluginListCmd() (cmd *cobra.Command) {
-	configPluginListCmd := &configPluginListCmd{}
+func NewConfigPluginListCmd(pluginOrg, pluginRepo string) (cmd *cobra.Command) {
+	configPluginListCmd := &configPluginListCmd{
+		PluginOrg:      pluginOrg,
+		PluginRepo:     pluginRepo,
+		PluginRepoName: pluginRepo,
+	}
 
 	cmd = &cobra.Command{
 		Use:               "list",
@@ -25,7 +29,7 @@ func NewConfigPluginListCmd() (cmd *cobra.Command) {
 func (c *configPluginListCmd) RunE(cmd *cobra.Command, args []string) (err error) {
 	c.Writer = cmd.OutOrStdout()
 	var plugins []pkg.Plugin
-	if plugins, err = pkg.FindPlugins(); err == nil {
+	if plugins, err = pkg.FindPlugins(c.PluginOrg, c.PluginRepoName); err == nil {
 		err = c.OutputV2(plugins)
 	}
 	return

@@ -5,6 +5,7 @@ import (
 	"compress/gzip"
 	"fmt"
 	"github.com/linuxsuren/go-cli-plugin/pkg"
+	hd "github.com/linuxsuren/http-downloader/pkg"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
@@ -18,23 +19,27 @@ import (
 // NewConfigPluginInstallCmd create a command for fetching plugin metadata
 func NewConfigPluginInstallCmd(pluginOrg, pluginRepo string) (cmd *cobra.Command) {
 	pluginInstallCmd := jcliPluginInstallCmd{
-		PluginOrg: pluginOrg,
-		PluginRepo: pluginRepo,
+		PluginOrg:      pluginOrg,
+		PluginRepo:     pluginRepo,
+		PluginRepoName: pluginRepo,
 	}
 
 	cmd = &cobra.Command{
-		Use:               "install",
-		Short:             "install a jcli plugin",
-		Long:              "install a jcli plugin",
-		Args:              cobra.MinimumNArgs(1),
-		ValidArgsFunction: ValidPluginNames,
-		RunE:              pluginInstallCmd.Run,
+		Use:   "install",
+		Short: "install a jcli plugin",
+		Long:  "install a jcli plugin",
+		Args:  cobra.MinimumNArgs(1),
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) (strings []string, directive cobra.ShellCompDirective) {
+			return ValidPluginNames(cmd, args, toComplete, pluginOrg, pluginRepo)
+		},
+		RunE: pluginInstallCmd.Run,
 	}
 
 	// add flags
 	flags := cmd.Flags()
 	flags.BoolVarP(&pluginInstallCmd.ShowProgress, "show-progress", "", true,
 		"If you want to show the progress of download")
+	flags.IntVarP(&pluginInstallCmd.Thread, "thread", "t", 4, "Using multi-thread to download plugin")
 	return
 }
 
@@ -47,7 +52,7 @@ func (c *jcliPluginInstallCmd) Run(cmd *cobra.Command, args []string) (err error
 	}
 
 	var data []byte
-	pluginsMetadataFile := fmt.Sprintf("%s/.%s/plugins-repo/%s.yaml", userHome, c.PluginRepo, name)
+	pluginsMetadataFile := fmt.Sprintf("%s/.%s/plugins-repo/%s.yaml", userHome, c.PluginRepoName, name)
 	if data, err = ioutil.ReadFile(pluginsMetadataFile); err == nil {
 		plugin := pkg.Plugin{}
 		if err = yaml.Unmarshal(data, &plugin); err == nil {
@@ -56,7 +61,7 @@ func (c *jcliPluginInstallCmd) Run(cmd *cobra.Command, args []string) (err error
 	}
 
 	if err == nil {
-		cachedMetadataFile := pkg.GetJCLIPluginPath(userHome, name, true)
+		cachedMetadataFile := pkg.GetJCLIPluginPath(userHome, c.PluginRepoName, name, true)
 		err = ioutil.WriteFile(cachedMetadataFile, data, 0664)
 	}
 	return
@@ -69,15 +74,22 @@ func (c *jcliPluginInstallCmd) download(plu pkg.Plugin) (err error) {
 	}
 
 	link := c.getDownloadLink(plu)
-	output := fmt.Sprintf("%s/.%s/plugins/%s.tar.gz", userHome, c.PluginOrg,plu.Main)
+	output := fmt.Sprintf("%s/.%s/plugins-repo/%s.tar.gz", userHome, c.PluginRepoName, plu.Main)
 
-	downloader := pkg.HTTPDownloader{
-		RoundTripper:   c.RoundTripper,
-		TargetFilePath: output,
-		URL:            link,
-		ShowProgress:   c.ShowProgress,
+	fmt.Printf("start to download from '%s' to '%s'\n", link, output)
+	if c.Thread > 1 {
+		err = hd.DownloadFileWithMultipleThread(link, output, c.Thread, c.ShowProgress)
+	} else {
+		downloader := hd.HTTPDownloader{
+			RoundTripper:   c.RoundTripper,
+			TargetFilePath: output,
+			URL:            link,
+			ShowProgress:   c.ShowProgress,
+		}
+		err = downloader.DownloadFile()
 	}
-	if err = downloader.DownloadFile(); err == nil {
+
+	if err == nil {
 		err = c.extractFiles(plu, output)
 	}
 	return

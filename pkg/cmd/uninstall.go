@@ -10,8 +10,12 @@ import (
 )
 
 // NewConfigPluginUninstallCmd create a command to uninstall a plugin
-func NewConfigPluginUninstallCmd() (cmd *cobra.Command) {
-	jcliPluginUninstallCmd := jcliPluginUninstallCmd{}
+func NewConfigPluginUninstallCmd(pluginOrg, pluginRepo string) (cmd *cobra.Command) {
+	jcliPluginUninstallCmd := jcliPluginUninstallCmd{
+		PluginOrg:      pluginOrg,
+		PluginRepo:     pluginRepo,
+		PluginRepoName: pluginRepo,
+	}
 
 	cmd = &cobra.Command{
 		Use:               "uninstall",
@@ -19,7 +23,9 @@ func NewConfigPluginUninstallCmd() (cmd *cobra.Command) {
 		Long:              "Remove a plugin",
 		Args:              cobra.MinimumNArgs(1),
 		RunE:              jcliPluginUninstallCmd.RunE,
-		ValidArgsFunction: ValidPluginNames,
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) (strings []string, directive cobra.ShellCompDirective) {
+			return ValidPluginNames(cmd, args, toComplete, pluginOrg, pluginRepo)
+		},
 	}
 	return
 }
@@ -32,13 +38,13 @@ func (c *jcliPluginUninstallCmd) RunE(cmd *cobra.Command, args []string) (err er
 	}
 
 	name := args[0]
-	cachedMetadataFile := pkg.GetJCLIPluginPath(userHome, name, false)
+	cachedMetadataFile := pkg.GetJCLIPluginPath(userHome, c.PluginRepoName, name, false)
 
 	var data []byte
 	if data, err = ioutil.ReadFile(cachedMetadataFile); err == nil {
 		plugin := &pkg.Plugin{}
 		if err = yaml.Unmarshal(data, plugin); err == nil {
-			mainFile := pkg.GetJCLIPluginPath(userHome, plugin.Main, true)
+			mainFile := pkg.GetJCLIPluginPath(userHome, c.PluginRepoName, plugin.Main, true)
 
 			os.Remove(cachedMetadataFile)
 			os.Remove(mainFile)
