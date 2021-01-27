@@ -56,7 +56,7 @@ func (c *jcliPluginFetchCmd) Run(cmd *cobra.Command, args []string) (err error) 
 		return
 	}
 
-	pluginRepoCache := fmt.Sprintf("%s/.jenkins-cli/plugins-repo", userHome)
+	pluginRepoCache := fmt.Sprintf("%s/.%s/plugins-repo", c.PluginRepo, userHome)
 	c.output = cmd.OutOrStdout()
 
 	cmd.Printf("start to fetch metadata from '%s', cache to '%s'\n", c.PluginRepo, pluginRepoCache)
