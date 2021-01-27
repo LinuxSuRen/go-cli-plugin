@@ -9,6 +9,9 @@ import (
 type (
 	configPluginListCmd struct {
 		cobra_ext.OutputOption
+		PluginOrg      string
+		PluginRepo     string
+		PluginRepoName string
 	}
 
 	jcliPluginFetchCmd struct {
