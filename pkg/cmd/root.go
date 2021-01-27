@@ -9,5 +9,5 @@ func AppendPluginCmd(root *cobra.Command, pluginOrg, pluginRepo string) {
 	root.AddCommand(NewConfigPluginListCmd(),
 		NewConfigPluginFetchCmd(pluginOrg, pluginRepo),
 		NewConfigPluginInstallCmd(pluginOrg, pluginRepo),
-		NewConfigPluginUninstallCmd())
+		NewConfigPluginUninstallCmd(pluginOrg, pluginRepo))
 }
