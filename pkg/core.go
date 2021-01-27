@@ -36,7 +36,7 @@ func FindPlugins(pluginOrg, pluginRepo string) (plugins []Plugin, err error) {
 	}
 
 	plugins = make([]Plugin, 0)
-	pluginsDir := fmt.Sprintf("%s/.jenkins-cli/plugins-repo/*.yaml", userHome)
+	pluginsDir := fmt.Sprintf("%s/.%s/plugins-repo/*.yaml", pluginRepo, userHome)
 	//fmt.Println("start to parse plugin file from dir", pluginsDir)
 	var files []string
 	if files, err = filepath.Glob(pluginsDir); err == nil {
