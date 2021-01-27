@@ -18,8 +18,9 @@ import (
 // NewConfigPluginInstallCmd create a command for fetching plugin metadata
 func NewConfigPluginInstallCmd(pluginOrg, pluginRepo string) (cmd *cobra.Command) {
 	pluginInstallCmd := jcliPluginInstallCmd{
-		PluginOrg: pluginOrg,
-		PluginRepo: pluginRepo,
+		PluginOrg:      pluginOrg,
+		PluginRepo:     pluginRepo,
+		PluginRepoName: pluginRepo,
 	}
 
 	cmd = &cobra.Command{
@@ -47,7 +48,7 @@ func (c *jcliPluginInstallCmd) Run(cmd *cobra.Command, args []string) (err error
 	}
 
 	var data []byte
-	pluginsMetadataFile := fmt.Sprintf("%s/.%s/plugins-repo/%s.yaml", userHome, c.PluginRepo, name)
+	pluginsMetadataFile := fmt.Sprintf("%s/.%s/plugins-repo/%s.yaml", userHome, c.PluginRepoName, name)
 	if data, err = ioutil.ReadFile(pluginsMetadataFile); err == nil {
 		plugin := pkg.Plugin{}
 		if err = yaml.Unmarshal(data, &plugin); err == nil {
@@ -56,7 +57,7 @@ func (c *jcliPluginInstallCmd) Run(cmd *cobra.Command, args []string) (err error
 	}
 
 	if err == nil {
-		cachedMetadataFile := pkg.GetJCLIPluginPath(userHome, name, true)
+		cachedMetadataFile := pkg.GetJCLIPluginPath(userHome, c.PluginRepoName, name, true)
 		err = ioutil.WriteFile(cachedMetadataFile, data, 0664)
 	}
 	return
@@ -69,7 +70,7 @@ func (c *jcliPluginInstallCmd) download(plu pkg.Plugin) (err error) {
 	}
 
 	link := c.getDownloadLink(plu)
-	output := fmt.Sprintf("%s/.%s/plugins/%s.tar.gz", userHome, c.PluginOrg,plu.Main)
+	output := fmt.Sprintf("%s/.%s/plugins/%s.tar.gz", userHome, c.PluginOrg, plu.Main)
 
 	downloader := pkg.HTTPDownloader{
 		RoundTripper:   c.RoundTripper,

@@ -28,14 +28,29 @@ type (
 		RoundTripper http.RoundTripper
 		ShowProgress bool
 
-		output     io.Writer
-		PluginOrg  string
-		PluginRepo string
+		output         io.Writer
+		PluginOrg      string
+		PluginRepo     string
+		PluginRepoName string
 	}
 
 	jcliPluginUninstallCmd struct {
+		RoundTripper http.RoundTripper
+		ShowProgress bool
+
+		output         io.Writer
+		PluginOrg      string
+		PluginRepo     string
+		PluginRepoName string
 	}
 
 	jcliPluginUpdateCmd struct {
+		RoundTripper http.RoundTripper
+		ShowProgress bool
+
+		output         io.Writer
+		PluginOrg      string
+		PluginRepo     string
+		PluginRepoName string
 	}
 )
