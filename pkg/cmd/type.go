@@ -1,9 +1,10 @@
 package config
 
 import (
-	cobra_ext "github.com/linuxsuren/cobra-extension"
 	"io"
 	"net/http"
+
+	cobra_ext "github.com/linuxsuren/cobra-extension/pkg"
 )
 
 type (
